@@ -4,6 +4,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Size;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Entity
 @Table(name = "users")
@@ -12,9 +14,11 @@ public class User {
     @Id
     @GeneratedValue
     private Long id;
+    @Size(min = 7, max = 15, message = "Username must be between 7 and 15 characters")
     private String username;
     private String name;
     private String email;
+    @Size(min = 7, max = 15, message = "Password must be between 7 and 15 characters")
     private String password;
 
     public String getPassword() {
@@ -22,7 +26,13 @@ public class User {
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        this.password = encoder.encode(password);
+    }
+
+    public boolean checkPassword(String rawPassword) {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        return encoder.matches(rawPassword, this.password);
     }
 
     public String getUsername() {
